@@ -1,7 +1,7 @@
 /*
 Package iocontrol offers `io.Writer` and `io.Reader` implementations
 that allow one to measure and throttle the rate at which data
-is transfered.
+is transferred.
 */
 package iocontrol
 
