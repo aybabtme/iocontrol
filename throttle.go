@@ -21,17 +21,19 @@ type throttledReader struct {
 	limiter *rateLimiter
 }
 
-func (t *throttledReader) Read(b []byte) (int, error) {
+func (t *throttledReader) Read(b []byte) (n int, err error) {
 	canRead := t.limiter.CanDo()
 	if len(b) <= canRead {
 		// no throttling needed
-		n, err := t.wrap.Read(b)
+		n, err = t.wrap.Read(b)
 		t.limiter.Did(n)
 		return n, err
 	}
 
-	// read what can be read for this batch
-	n, err := t.wrap.Read(b[:canRead])
+	if canRead > 0 {
+		// read what can be read for this batch
+		n, err = t.wrap.Read(b[:canRead])
+	}
 
 	t.limiter.Limit()
 
