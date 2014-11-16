@@ -37,8 +37,8 @@ func (c *rateCounter) Total() int {
 }
 
 func (c *rateCounter) Rate(perPeriod time.Duration) float64 {
-	c.mu.RLock()
-	defer c.mu.RUnlock()
+	c.mu.Lock()
+	defer c.mu.Unlock()
 
 	now := c.time.Now()
 
