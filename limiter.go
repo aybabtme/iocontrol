@@ -9,7 +9,7 @@ type rateLimiter struct {
 	limitPerSec int
 	resolution  time.Duration
 
-	time clock.Clock
+	time clock.Clock // YAGNI wrapper for YAGNI deterministic testing
 
 	maxPerBatch int
 	batchDone   int

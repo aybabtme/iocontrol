@@ -7,7 +7,7 @@ import (
 )
 
 type rateCounter struct {
-	time  clock.Clock
+	time  clock.Clock // YAGNI, maybe, idk, how to test this
 	mu    sync.RWMutex
 	count int
 
