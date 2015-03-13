@@ -1,9 +1,10 @@
 package iocontrol
 
 import (
-	"github.com/benbjohnson/clock"
 	"sync"
 	"time"
+
+	"github.com/benbjohnson/clock"
 )
 
 type rateCounter struct {
