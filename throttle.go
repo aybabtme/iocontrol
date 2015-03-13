@@ -5,11 +5,28 @@ import (
 	"time"
 )
 
+type (
+	Throttler interface {
+		// SetRate changes the rate at which the throttler allows reads or writes.
+		SetRate(perSec int)
+	}
+
+	ThrottlerReader interface {
+		io.Reader
+		Throttler
+	}
+
+	ThrottlerWriter interface {
+		io.Writer
+		Throttler
+	}
+)
+
 // ThrottledReader ensures that reads to `r` never exceeds a specified rate of
 // bytes per second. The `maxBurst` duration changes how often the verification is
 // done. The smaller the value, the less bursty, but also the more overhead there
 // is to the throttling.
-func ThrottledReader(r io.Reader, bytesPerSec int, maxBurst time.Duration) io.Reader {
+func ThrottledReader(r io.Reader, bytesPerSec int, maxBurst time.Duration) ThrottlerReader {
 	return &throttledReader{
 		wrap:    r,
 		limiter: newRateLimiter(bytesPerSec, maxBurst),
@@ -41,11 +58,16 @@ func (t *throttledReader) Read(b []byte) (n int, err error) {
 	return n, err
 }
 
+// SetRate changes the rate at which the throttled reader allows reads.
+func (t *throttledReader) SetRate(perSec int) {
+	t.limiter.SetRate(perSec)
+}
+
 // ThrottledWriter ensures that writes to `w` never exceeds a specified rate of
 // bytes per second. The `maxBurst` duration changes how often the verification is
 // done. The smaller the value, the less bursty, but also the more overhead there
 // is to the throttling.
-func ThrottledWriter(w io.Writer, bytesPerSec int, maxBurst time.Duration) io.Writer {
+func ThrottledWriter(w io.Writer, bytesPerSec int, maxBurst time.Duration) ThrottlerWriter {
 	return &throttledWriter{
 		wrap:    w,
 		limiter: newRateLimiter(bytesPerSec, maxBurst),
@@ -77,4 +99,9 @@ func (t *throttledWriter) Write(b []byte) (n int, err error) {
 		}
 		t.limiter.Limit()
 	}
+}
+
+// SetRate changes the rate at which the throttled writer allows writes.
+func (t *throttledWriter) SetRate(perSec int) {
+	t.limiter.SetRate(perSec)
 }
