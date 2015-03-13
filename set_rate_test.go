@@ -2,13 +2,14 @@ package iocontrol
 
 import (
 	"bytes"
-	"github.com/dustin/go-humanize"
 	"io"
 	"io/ioutil"
 	"math"
 	"sort"
 	"testing"
 	"time"
+
+	"github.com/dustin/go-humanize"
 )
 
 func TestSetWriteRate(t *testing.T) {

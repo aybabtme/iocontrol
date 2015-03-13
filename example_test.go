@@ -5,12 +5,13 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"fmt"
-	"github.com/aybabtme/iocontrol"
-	"github.com/dustin/go-humanize"
 	"io"
 	"io/ioutil"
 	"log"
 	"time"
+
+	"github.com/aybabtme/iocontrol"
+	"github.com/dustin/go-humanize"
 )
 
 func Example_ThrottledReader() {

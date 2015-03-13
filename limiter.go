@@ -1,9 +1,10 @@
 package iocontrol
 
 import (
-	"github.com/benbjohnson/clock"
 	"sync/atomic"
 	"time"
+
+	"github.com/benbjohnson/clock"
 )
 
 type rateLimiter struct {
