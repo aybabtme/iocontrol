@@ -53,34 +53,6 @@ func TestSetWriteRate(t *testing.T) {
 	}
 }
 
-func assertWriteRate(t *testing.T, approxPerSec int, mw *MeasuredWriter, measures int, sleep time.Duration) {
-	eachSleep := sleep / time.Duration(measures)
-
-	rates := make([]int, measures)
-	for i := 0; i < measures; i++ {
-		time.Sleep(eachSleep)
-		rates[i] = int(mw.BytesPerSec())
-	}
-	sort.Ints(rates)
-	median := float64(rates[len(rates)/2])
-	if len(rates)%2 != 0 {
-		// average of two middle ones
-		median = (median + float64(rates[(len(rates)/2)+1])) / 2
-	}
-
-	approx := float64(approxPerSec)
-
-	percentDiff := math.Min(approx, median) / math.Max(approx, median)
-
-	t.Logf("%.1f%% difference", percentDiff*100)
-	t.Logf("want rate ~%s", humanize.Bytes(uint64(approxPerSec)))
-	t.Logf(" got rate ~%s", humanize.Bytes(uint64(median)))
-
-	if percentDiff < 0.8 {
-		t.Errorf("too different!")
-	}
-}
-
 func TestSetReadRate(t *testing.T) {
 
 	totalSize := 10 * MiB
@@ -123,6 +95,34 @@ func TestSetReadRate(t *testing.T) {
 	}
 }
 
+func assertWriteRate(t *testing.T, approxPerSec int, mw *MeasuredWriter, measures int, sleep time.Duration) {
+	eachSleep := sleep / time.Duration(measures)
+
+	rates := make([]int, measures)
+	for i := 0; i < measures; i++ {
+		time.Sleep(eachSleep)
+		rates[i] = int(mw.BytesPerSec())
+	}
+	sort.Ints(rates)
+	median := float64(rates[len(rates)/2])
+	if len(rates)%2 != 0 {
+		// average of two middle ones
+		median = (median + float64(rates[(len(rates)/2)+1])) / 2
+	}
+
+	approx := float64(approxPerSec)
+
+	percentDiff := math.Min(approx, median) / math.Max(approx, median)
+
+	t.Logf("%.1f%% similarity", percentDiff*100)
+	t.Logf("want rate ~%s", humanize.Bytes(uint64(approxPerSec)))
+	t.Logf(" got rate ~%s", humanize.Bytes(uint64(median)))
+
+	if percentDiff < 0.8 {
+		t.Errorf("!! too different!")
+	}
+}
+
 func assertReadRate(t *testing.T, approxPerSec int, mw *MeasuredReader, measures int, sleep time.Duration) {
 	eachSleep := sleep / time.Duration(measures)
 
@@ -141,11 +141,11 @@ func assertReadRate(t *testing.T, approxPerSec int, mw *MeasuredReader, measures
 	approx := float64(approxPerSec)
 
 	percentDiff := math.Min(approx, median) / math.Max(approx, median)
-	t.Logf("%.1f%% difference", percentDiff*100)
+	t.Logf("%.1f%% similarity", percentDiff*100)
 	t.Logf("want rate ~%s", humanize.Bytes(uint64(approxPerSec)))
 	t.Logf(" got rate ~%s", humanize.Bytes(uint64(median)))
 
 	if percentDiff < 0.8 {
-		t.Errorf("too different!")
+		t.Errorf("!! too different!")
 	}
 }
