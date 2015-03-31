@@ -109,15 +109,15 @@ func NewReaderPool(maxRate int, maxBurst time.Duration) *ReaderPool {
 	}
 }
 
-// Get a throttled reader that wraps w.
-func (pool *ReaderPool) Get(w io.Reader) (reader io.Reader, release func()) {
+// Get a throttled reader that wraps r.
+func (pool *ReaderPool) Get(r io.Reader) (reader io.Reader, release func()) {
 	// don't export a ThrottlerReader to prevent users changing the rate
 	// and expecting their change to be respected, since we might modify
 	// the rate under their feet
 
 	// make the initial rate be 0, the actual rate is
 	// set in the call to `setSharedRates`.
-	rd := ThrottledReader(w, 0, pool.maxBurst)
+	rd := ThrottledReader(r, 0, pool.maxBurst)
 
 	pool.mu.Lock()
 	pool.givenOut[rd] = struct{}{}
