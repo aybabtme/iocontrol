@@ -32,7 +32,11 @@ func newRateLimiter(perSec int, maxBurst time.Duration) *rateLimiter {
 
 func (r *rateLimiter) CanDo() (canDo int) {
 	perBatch := atomic.LoadInt64(&r.maxPerBatch)
-	return int(perBatch - r.batchDone)
+	canDo = int(perBatch - r.batchDone)
+	if canDo < 0 {
+		return 0
+	}
+	return canDo
 }
 
 func (r *rateLimiter) Did(n int) {
