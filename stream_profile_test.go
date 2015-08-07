@@ -1,7 +1,6 @@
 package iocontrol
 
 import (
-	"bytes"
 	"io"
 	"io/ioutil"
 	"math"
@@ -68,9 +67,9 @@ loop:
 func TestProfileSample(t *testing.T) {
 
 	wantProfile := TimeProfile{
-		Total:     2 * time.Second,
-		WaitRead:  500 * time.Millisecond,
-		WaitWrite: 1500 * time.Millisecond,
+		Total:     10 * time.Second,
+		WaitRead:  1 * time.Second,
+		WaitWrite: 9 * time.Second,
 	}
 	clk := clock.NewMock()
 
@@ -120,28 +119,59 @@ loop:
 }
 
 func BenchmarkNoProfile(b *testing.B) {
-
-	reader := bytes.NewReader(make([]byte, 1<<30))
-	writer := ioutil.Discard
-
+	byteCount := int64(1 << 30)
+	b.SetBytes(byteCount)
 	b.ReportAllocs()
-	b.ResetTimer()
+
 	for i := 0; i < b.N; i++ {
+		reader := io.LimitReader(readFunc(func(p []byte) (int, error) {
+			return len(p), nil
+		}), byteCount)
+		writer := ioutil.Discard
+
+		b.StartTimer()
 		io.Copy(writer, reader)
+		b.StopTimer()
 	}
 }
 
 func BenchmarkProfile(b *testing.B) {
-
-	reader := bytes.NewReader(make([]byte, 1<<30))
-	writer := ioutil.Discard
-
-	pwriter, preader, done := Profile(writer, reader)
-
+	byteCount := int64(1 << 30)
+	b.SetBytes(byteCount)
 	b.ReportAllocs()
-	b.ResetTimer()
+
 	for i := 0; i < b.N; i++ {
+		reader := io.LimitReader(readFunc(func(p []byte) (int, error) {
+			return len(p), nil
+		}), byteCount)
+		writer := ioutil.Discard
+		pwriter, preader, done := Profile(writer, reader)
+
+		b.StartTimer()
 		io.Copy(pwriter, preader)
+		b.StopTimer()
+
+		done()
+	}
+}
+
+func BenchmarkProfileSample(b *testing.B) {
+	byteCount := int64(1 << 30)
+	b.SetBytes(byteCount)
+	b.ReportAllocs()
+
+	for i := 0; i < b.N; i++ {
+		reader := io.LimitReader(readFunc(func(p []byte) (int, error) {
+			return len(p), nil
+		}), byteCount)
+		writer := ioutil.Discard
+
+		pwriter, preader, done := ProfileSample(writer, reader, time.Millisecond)
+
+		b.StartTimer()
+		io.Copy(pwriter, preader)
+		b.StopTimer()
+
 		done()
 	}
 }

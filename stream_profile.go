@@ -22,7 +22,7 @@ type TimeProfile struct {
 // times.
 //
 // There is a small performance overhead of ~µs per Read/Write call.
-// This is negligible in most I/O workload. If the overhead is too
+// This is negligible in most I/O workloads. If the overhead is too
 // much for your needs, use the `ProfileSample` call.
 func Profile(w io.Writer, r io.Reader) (pw io.Writer, pr io.Reader, done func() TimeProfile) {
 	return profile(clock.New(), w, r)
@@ -80,8 +80,8 @@ func (t *preciseTimedWriter) Write(p []byte) (int, error) {
 // sampling, high performance profiler
 
 const (
-	state_runtime uint32 = iota
-	state_blocked
+	stateRuntime uint32 = iota
+	stateBlocked
 )
 
 // ProfileSample will wrap a writer and reader pair and collect
@@ -123,8 +123,8 @@ func profileSample(clk clock.Clock, w io.Writer, r io.Reader, res time.Duration)
 			select {
 			case <-ticker.C:
 
-				isWriting := atomic.LoadUint32(&samplingWriter.state) == state_blocked
-				isReading := atomic.LoadUint32(&samplingReader.state) == state_blocked
+				isWriting := atomic.LoadUint32(&samplingWriter.state) == stateBlocked
+				isReading := atomic.LoadUint32(&samplingReader.state) == stateBlocked
 
 				if isWriting {
 					samples.Writing++
@@ -160,9 +160,9 @@ type samplingTimeReader struct {
 }
 
 func (s *samplingTimeReader) Read(p []byte) (int, error) {
-	atomic.StoreUint32(&s.state, state_blocked)
+	atomic.StoreUint32(&s.state, stateBlocked)
 	n, err := s.r.Read(p)
-	atomic.StoreUint32(&s.state, state_runtime)
+	atomic.StoreUint32(&s.state, stateRuntime)
 	return n, err
 }
 
@@ -172,8 +172,8 @@ type samplingTimeWriter struct {
 }
 
 func (s *samplingTimeWriter) Write(p []byte) (int, error) {
-	atomic.StoreUint32(&s.state, state_blocked)
+	atomic.StoreUint32(&s.state, stateBlocked)
 	n, err := s.w.Write(p)
-	atomic.StoreUint32(&s.state, state_runtime)
+	atomic.StoreUint32(&s.state, stateRuntime)
 	return n, err
 }
