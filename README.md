@@ -2,7 +2,7 @@
 --
     import "github.com/aybabtme/iocontrol"
 
-Package iocontrol offers `io.Writer` and `io.Reader` implementations that allow
+Package iocontrol offers `io.Writer`, `io.Reader`, `io.WriterAt`, and `io.ReaderAt` implementations that allow
 one to measure and throttle the rate at which data is transferred.
 
 ## Usage
@@ -16,6 +16,13 @@ const (
 ```
 Orders of magnitude of data, in kibibyte (powers of 2, or multiples of 1024).
 See https://en.wikipedia.org/wiki/Kibibyte.
+
+### Exposed Methods and Types
+
+For all of the exposed functionality, there are versions for all of `io.{Reader,Writer}At` with intuitive naming conventions.
+
+The `io.{Reader,Writer}` implementations are documented below.
+
 
 #### func  ThrottledReader
 
