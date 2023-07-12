@@ -72,3 +72,67 @@ func (m *MeasuredReader) Read(b []byte) (n int, err error) {
 	m.rate.Add(n)
 	return n, err
 }
+
+// MeasuredReaderAt wraps an io.ReaderAt and tracks how many bytes are read from it.
+type MeasuredReaderAt struct {
+	wrap io.ReaderAt
+	rate *rateCounter
+}
+
+// NewMeasuredReaderAt wraps a ReaderAt.
+func NewMeasuredReaderAt(r io.ReaderAt) *MeasuredReaderAt {
+	return &MeasuredReaderAt{wrap: r, rate: newCounter()}
+}
+
+// BytesPer tells the rate per period at which bytes were read since last measurement.
+func (m *MeasuredReaderAt) BytesPer(perPeriod time.Duration) uint64 {
+	return uint64(m.rate.Rate(perPeriod))
+}
+
+// BytesPerSec tells the rate per second at which bytes were read since last measurement.
+func (m *MeasuredReaderAt) BytesPerSec() uint64 {
+	return uint64(m.rate.Rate(time.Second))
+}
+
+// Total number of bytes that have been read.
+func (m *MeasuredReaderAt) Total() int {
+	return m.rate.Total()
+}
+
+func (m *MeasuredReaderAt) ReadAt(p []byte, off int64) (n int, err error) {
+	n, err = m.wrap.ReadAt(p, off)
+	m.rate.Add(n)
+	return n, err
+}
+
+// MeasuredWriterAt wraps an io.WriterAt and tracks how many bytes are written to it.
+type MeasuredWriterAt struct {
+	wrap io.WriterAt
+	rate *rateCounter
+}
+
+// NewMeasuredWriterAt wraps a WriterAt.
+func NewMeasuredWriterAt(w io.WriterAt) *MeasuredWriterAt {
+	return &MeasuredWriterAt{wrap: w, rate: newCounter()}
+}
+
+// BytesPer tells the rate per period at which bytes were written since last measurement.
+func (m *MeasuredWriterAt) BytesPer(perPeriod time.Duration) uint64 {
+	return uint64(m.rate.Rate(perPeriod))
+}
+
+// BytesPerSec tells the rate per second at which bytes were written since last measurement.
+func (m *MeasuredWriterAt) BytesPerSec() uint64 {
+	return uint64(m.rate.Rate(time.Second))
+}
+
+// Total number of bytes that have been written.
+func (m *MeasuredWriterAt) Total() int {
+	return m.rate.Total()
+}
+
+func (m *MeasuredWriterAt) WriteAt(p []byte, off int64) (n int, err error) {
+	n, err = m.wrap.WriteAt(p, off)
+	m.rate.Add(n)
+	return n, err
+}
