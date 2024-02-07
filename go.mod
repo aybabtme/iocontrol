@@ -1,6 +1,6 @@
 module github.com/aybabtme/iocontrol
 
-go 1.0
+go 1.21
 
 require (
 	github.com/benbjohnson/clock v1.3.3
